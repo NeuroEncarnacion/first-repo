@@ -21,6 +21,11 @@ def create():
 
 @app.route('/create_user', methods=["POST"])
 def create_user():
+
+    if not User.validate_user(request.form): # if there are errors: We call the staticmethod on Burger model to validate
+        return redirect('/create_user') # redirect to the route where the burger form is rendered. 
+    # else no errors:
+
     # First we make a data dictionary from our request.form coming from our template.
     # The keys in data need to line up exactly with the variables in our query string. 
     data = {
@@ -28,6 +33,10 @@ def create_user():
         "lname" : request.form["lname"],
         "email" : request.form["email"], 
     }
+    valid = User.validate_user(data)
+    if valid:
+        User.create_new_user(request.form)
+        return redirect('/')
     # We pass the data dictionary into the save method from the User class. 
     User.save(data)
     # Don't forget to redirect after saving to the database.

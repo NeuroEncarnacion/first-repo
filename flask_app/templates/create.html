@@ -12,6 +12,15 @@
         <a href="/users">Home</a>
         <h1>Add A User</h1>
         <form action="/create_user" method="POST">
+
+            {% with messages = get_flashed_messages() %}     <!-- declare a variable called messages -->
+                {% if messages %}                            <!-- check if there are any messages -->
+                    {% for message in messages %}            <!-- loop through the messages -->
+                        <p>{{message}}</p>                   <!-- display each message in a paragraph tag -->
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
             <label for="fname">First Name:</label>
             <input type="text" name="fname">
             <label for="lname">Last Name:</label>

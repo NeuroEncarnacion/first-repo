@@ -1,7 +1,9 @@
 # import the function that will return an instance of a connection
 from flask_app.config.mysqlconnection import connectToMySQL
-
-# db = 'users_schema'
+from flask import flash
+import re       # the regex module 
+# create a regular expression object that we'll user later
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
 # model the class after the user table from our database
 class User:
@@ -60,3 +62,29 @@ class User:
         data = {'id' : one_user_id}
         query = "DELETE FROM users WHERE id = %(id)s;"
         return connectToMySQL('users_schema').query_db(query, data)
+
+
+# Static methods don't have self or cls passed into the parameters. 
+# We do need to take in a parameter represent our user
+    @staticmethod
+    def validate_user(data):
+        EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
+        is_valid = True 
+        if len(data['fname']) < 2:
+            flash("First Name must be at least 2 characters.")
+            is_valid = False
+        if len(data['lname']) < 2:
+            flash("Last Name must be at least 2 characters.")
+            is_valid = False
+        if not EMAIL_REGEX.match(data['email']):
+            flash("Invalid email address")
+            is_valid = False
+        query = """
+                SELECT * FROM users
+                WHERE email = %(email)s;
+                """
+        results = connectToMySQL('users_schema').query_db(query, data)
+        if len(results) != 0:
+            flash('This email is already being used')
+            is_valid = False
+        return is_valid
